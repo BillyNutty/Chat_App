@@ -36,7 +36,7 @@ const Dashboard = () => {
    useEffect(() => {
     const loggedInUser = JSON.parse(localStorage.getItem('user:detail'))
     const fetchConversations = async() => {
-        const res = await fetch(`http://localhost:8000/api/conversations/${loggedInUser?.id}`, {
+        const res = await fetch(`http://localhost:3000/api/conversations/${loggedInUser?.id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
