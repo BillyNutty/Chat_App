@@ -36,13 +36,14 @@ const Dashboard = () => {
    useEffect(() => {
     const loggedInUser = JSON.parse(localStorage.getItem('user:detail'))
     const fetchConversations = async() => {
-        const res = await fetch(`http://localhost:3000/api/conversations/${loggedInUser?.id}`, {
+        const res = await fetch(`http://localhost:3001/api/conversations/${loggedInUser?.id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             }
         });
         const resData = await res.json()
+        console.log('resData :>> ', resData);
         setConversations(resData)
     }
     fetchConversations()
@@ -50,6 +51,20 @@ const Dashboard = () => {
 
     const [ user, setUser ] = useState(JSON.parse(localStorage.getItem('user:detail')))
     const [ conversations, setConversations ] = useState([]) 
+    const [ messages, setMessages ] = useState([])
+    console.log('conversations :>> ', conversations);
+
+    const fetchMessages = async(conversationId) => {
+        const res = await fetch(`http://localhost:3001/api/message/${conversationId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const resData = await res.json()
+        console.log('resData :>> ', resData);
+    }
+
   return (
     <div className='w-screen flex'>
         <div className='w-[25%] h-screen bg-secondary'>
@@ -65,10 +80,12 @@ const Dashboard = () => {
                 <div className='text-primary text-lg'>Messages</div>
                 <div>
                    {
-                    conversations.map(({ conversationId, user }) => {
+                    !conversations.length > 0 ?
+                      conversations.map(( conversationId, user ) => {
                         return(
                             <div className='flex items-center py-8 border-b border-b-gray-300'>
-                            <div className='cursor-pointer flex items-center'>    
+                            <div className='cursor-pointer flex items-center' onClick={() => 
+                            fetchMessages(conversationId)}>    
                             <div><img src={Client} className='w-[60px] h-[60px] rounded-full p-[2px] border border-primary' /></div> 
                             <div className='ml-6'>
                                <h3 className='text-lg font-semibold'>{user?.fullName}</h3>
@@ -77,7 +94,7 @@ const Dashboard = () => {
                               </div>
                           </div>
                         )
-                    })
+                      }) : <div className='text-center text-lg font-semibold mt-24'>No Conversations</div>
                    }
                 </div>
             </div>
@@ -100,30 +117,24 @@ const Dashboard = () => {
         </div>
     <div className='h-[75%] w-full overflow-auto shadow-sm'>
         <div className='p-14'>
-           <div className='max-w-[40%] bg-secondary rounded-b-xl rounded-tr-xl p-4 mb-6'>
-            See You When I Get Home
-           </div>
-           <div className='max-w-[40%] bg-primary rounded-b-xl rounded-tl-xl ml-auto p-4 text-white mb-6'>
-             Ok no problem
-           </div>
-           <div className='max-w-[40%] bg-secondary rounded-b-xl rounded-tr-xl p-4 mb-6'>
-            See You When I Get Home
-           </div>
-           <div className='max-w-[40%] bg-primary rounded-b-xl rounded-tl-xl ml-auto p-4 text-white mb-6'>
-             Ok no problem
-           </div>
-           <div className='max-w-[40%] bg-secondary rounded-b-xl rounded-tr-xl p-4 mb-6'>
-            See You When I Get Home
-           </div>
-           <div className='max-w-[40%] bg-primary rounded-b-xl rounded-tl-xl ml-auto p-4 text-white mb-6'>
-             Ok no problem
-           </div>
-           <div className='max-w-[40%] bg-secondary rounded-b-xl rounded-tr-xl p-4 mb-6'>
-            See You When I Get Home
-           </div>
-           <div className='max-w-[40%] bg-primary rounded-b-xl rounded-tl-xl ml-auto p-4 text-white mb-6'>
-             Ok no problem
-           </div>
+           {
+            messages.length > 0 ?
+            messages.map(({ message, user : { id } = {} }) => {
+                if(id === user?.id) {
+                    return(
+                        <div className='max-w-[40%] bg-primary rounded-b-xl rounded-tl-xl ml-auto p-4 text-white mb-6'>
+                        {message}
+                      </div>
+                    )
+                } else {
+                    return(
+                        <div className='max-w-[40%] bg-secondary rounded-b-xl rounded-tr-xl p-4 mb-6'>
+                        {message}
+                        </div>
+                )
+            }  
+        }) : <div className='text-center text-lg font-semibold mt-24'>No Messages</div>
+           }
         </div>
     </div>
         <div className='p-14 w-full flex items-center'>
